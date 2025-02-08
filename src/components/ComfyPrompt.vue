@@ -105,6 +105,9 @@ function parseParams() {
 }
 
 function handleSave() {
+  if (props.params) {
+    props.params.prompt = null;
+  }
   emit("save");
   showSaveModal.value = false;
 }

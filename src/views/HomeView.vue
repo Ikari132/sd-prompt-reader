@@ -11,6 +11,7 @@ import Card from "../components/Card.vue";
 import Modal from "../components/Modal.vue";
 import ImageSelector from "../components/ImageSelector.vue";
 import IconCancel from "../components/icons/IconCancel.vue";
+import IconDownload from "../components/icons/IconDownload.vue";
 
 import {
   saveFile,
@@ -106,7 +107,18 @@ async function handleSavePicture() {
 async function handleDownloadPicture() {
   rShowSavePictureModal.value = false;
   const blob = await removeExif(rSelected.value.file);
-  saveImage(blob, rPictureFilename.value);
+  const cleanFilename = rPictureFilename.value.replace(/\.[^/.]+$/, "");
+  saveImage(blob, cleanFilename);
+}
+
+async function handleDownloadAll() {
+  if (rImages.value && rImages.value.length > 1) {
+    for (const image of rImages.value) {
+      const blob = await removeExif(image.file);
+      const cleanFilename = image.filename.replace(/\.[^/.]+$/, "");
+      saveImage(blob, `${cleanFilename}_no_meta_data`);
+    }
+  }
 }
 </script>
 
@@ -182,6 +194,15 @@ async function handleDownloadPicture() {
 
       Clear
     </button>
+    <div v-if="rImages?.length > 1">
+      <button
+        @click="handleDownloadAll"
+        class="inline-flex items-center text-white bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center sm:mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+      >
+        <IconDownload />
+        Download All
+      </button>
+    </div>
     <div class="columns-2 md:columns-3 lg:columns-4 mt-1">
       <div v-for="rImage in rImages" :key="rImage.id" class="inline-block mb-2">
         <Card :url="rImage.imageURL" @click="() => (rSelected = rImage)" />

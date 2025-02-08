@@ -18,14 +18,21 @@ export function saveFile(content, name, ext) {
 }
 
 export function saveImage(blob, filename) {
-  const imageURL = URL.createObjectURL(blob);
+  // Garante que o filename termine com .png
+  const cleanFilename = filename.replace(/\.[^/.]+$/, ""); // Remove qualquer extensão existente
+  const finalFilename = `${cleanFilename}.png`;
 
-  const linkEl = document.createElement("a");
-  linkEl.download = filename;
-  linkEl.href = imageURL;
-  linkEl.click();
-  URL.revokeObjectURL(imageURL);
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.style.display = "none";
+  a.href = url;
+  a.download = finalFilename;
+  document.body.appendChild(a);
+  a.click();
+  window.URL.revokeObjectURL(url);
+  a.remove();
 }
+
 export async function removeExif(file, options = {}) {
   return new Promise((res, rej) => {
     new Compressor(file, {
@@ -42,6 +49,7 @@ export async function removeExif(file, options = {}) {
     });
   });
 }
+
 export function removeExifCanvas(file) {
   const reader = new FileReader();
   const ext = file.name.split(".").pop();
@@ -85,6 +93,7 @@ export function removeExifCanvas(file) {
   // Read the image file as a data URL
   reader.readAsDataURL(file);
 }
+
 export function getFileName(fullname) {
   return fullname.split(".").slice(0, -1).join(".");
 }
